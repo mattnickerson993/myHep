@@ -1,0 +1,57 @@
+{% extends "exercises/layout.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+{% block content %}
+
+    <div class="program-header">
+        <a href="{% url 'create_program' %}"class="button btn-pri">Create A Program</a>
+        {% if programs %}
+        <a href="{% url 'training_programs_list' %}"class="button btn-danger">Delete A Program</a>
+        {% else %}
+        {% endif %}
+    </div>
+    {% if programs %}
+    <div class="program-main-container">
+        <div class="list-group">
+            <button class="list-group-item btn mb-2 program-view">View Programs</button>
+        
+            {% for program in programs %}
+            <button data-id={{program.id}} class="exerciseToggler list-group-item btn program-item hide">{{program}}</button>
+            {% for content in program.contents.all %}  
+            <div class="exercises{{program.id}} list-item ex-list-item hide">
+                
+                <div class="list-group-item btn d-flex justify-content-around list-ex-item">
+                    <span class="ex-name">{{content.exercise}}</span>
+                    <span>
+                        <a class="mr-1 btn btn-pri edit-link"href="{% url 'exercisestats_update' content.id %}"><i class="far fa-edit"></i></a>
+                        <a class="ml-1 btn btn-danger del-link" href="{% url 'exercisestats_delete' content.id %}"><i class="far fa-trash-alt"></i></a>
+                    </span>
+                </div>
+                
+            </div>
+            {% endfor %}
+                
+            
+            {% endfor %}
+
+    
+            
+        </div>
+       
+    </div>
+    {% else %}
+    <div class="container">
+        <p>You currently have no programs</p>
+    </div>
+    {% endif %}
+    
+    {% block script%}
+    <script src="{% static 'exercises/programs.js' %}"></script>
+   {% endblock %}
+    
+    
+    
+
+{% endblock content %}

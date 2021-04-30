@@ -1,0 +1,30 @@
+{% extends "exercises/layout.html" %}
+{% load static %}
+
+
+{% block content %}
+   
+  <div class="container mt-4 p-1">
+
+      <div class="form-group">
+        <input class="form-control library-input" placeholder="Enter Exercise" type="text">
+      </div>
+    
+  </div>
+  
+  <div class="card-container">
+
+  </div>
+  <nav id="exercise-nav" class="pagination" aria-label="Page navigation">
+    <ul class="step-links pagination">
+      <li class="page-item"><button class="page-link" id="prev">previous</button></li>
+      <li class="page-item"><button class="page-link" id="next">next</button></li>
+    </ul>
+  </nav>
+     
+    {% block script%}
+    <script src="{% static 'exercises/library.js' %}"></script>
+   {% endblock %}
+
+
+{% endblock content %}

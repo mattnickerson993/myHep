@@ -1,0 +1,159 @@
+
+
+{% extends "exercises/layout.html" %}
+{% load static %}
+{% block content %}
+  {% if programs %}
+  <div class="container text-center mb-4 mt-4">
+      <h2 class="calendar-head">Add a workout program to your google calendar below</h2>
+      <div class="list-group">
+          <button class="list-group-item btn mb-2 program-view">Select Program</button>
+      
+          {% for program in programs %}
+          <button data-id={{program.id}} class="exerciseToggler list-group-item btn program-item mt-0 mb-0 hide">{{program}}</button>
+              
+          
+          {% endfor %}
+      </div>
+
+      <div class="form-group mt-4">
+          <label for="program-date">Select Date</label>
+          <input class="form-control" type="date" id="program-date" name="program-date">
+      </div>
+      <div class="form-group">
+        <label for="program-start">Select Start Time:</label>
+        <input class="form-control" type="time" id="program-start" name="program-start">
+      </div>
+      <div class="form-group">
+        <label for="program-end">Select End Time:</label>
+        <input class="form-control" type="time" id="program-end" name="program-end">
+      </div>
+      <input id="timezone" type="hidden" value="{{timezone}}">
+          
+          
+      
+      <button class="btn btn-sm btn-primary" id="testbtn">Add to Google Calendar <i class="far fa-calendar-check"></i></button>
+  </div>
+  {% else %}
+  <div class="container mt-2">
+      <p>You currently have no programs</p>
+  </div>
+  {% endif %}
+
+  
+
+   
+    {% block script %}
+    {% comment %} <script src="{% static 'mycalendar/config.js' %}"></script> {% endcomment %}
+    {% comment %} <script src="{% static 'mycalendar/calendar.js' %}"></script> {% endcomment %}
+    <script type="text/javascript">
+    var gapi = window.gapi
+
+    var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
+    var SCOPES = "https://www.googleapis.com/auth/calendar.events"
+
+
+    const programEvent = {
+      'summary':"",
+      'location':"Charlottesville VA",
+      'description':"",
+      'start': {
+        'timeZone': '',
+        'dateTime': ''
+        
+      },
+      'end': {
+        'timeZone': '',
+        'dateTime': ''
+        
+      }
+    }
+
+    const handleClick = () => {
+    gapi.load('client:auth2', () => {
+      
+
+      gapi.client.init({
+        apiKey: '{{calendarapiKey}}',
+        clientId: '{{calendarclientID}}',
+        discoveryDocs: DISCOVERY_DOCS,
+        scope: SCOPES,
+      })
+
+    
+      gapi.client.load('calendar', 'v3')
+
+      
+      gapi.auth2.getAuthInstance().signIn()
+      .then(() => {
+        
+        var event = programEvent
+        
+
+        var request = gapi.client.calendar.events.insert({
+          'calendarId': 'primary',
+          'resource': event,
+        })
+
+        request.execute(event => {
+          
+          window.open(event.htmlLink)
+        })
+    
+
+      })
+    })
+
+    }
+    const testBtn = document.getElementById('testbtn')
+    testBtn.onclick= () => {
+      handleInputs()
+      handleClick()
+    }
+
+    function handleInputs(){
+
+      let start = document.getElementById('program-start')
+      let date = document.getElementById('program-date')
+      let end = document.getElementById('program-end')
+      
+      programEvent.start.timeZone = '{{timezone}}'
+      programEvent.end.timeZone = '{{timezone}}'
+
+      
+      programEvent.start.dateTime = `${date.value}T${start.value}:00`
+      programEvent.end.dateTime = `${date.value}T${end.value}:00`
+      
+      
+      
+      
+      
+      
+    }
+
+  
+    programToggleButton = document.querySelector('.program-view')
+    programToggleButton.onclick = function(){
+        items = Array.from(document.querySelectorAll('.program-item'))
+        items.forEach(item => {
+            item.classList.toggle('hide')
+            item.addEventListener('click', () =>{
+             
+              toggelProgramEventData(item.dataset.id)},
+              {once: true})
+            })
+        
+    }
+
+    async function toggelProgramEventData(id){
+      let response = await fetch(`/exercise/programs/retrieve/${String(id)}`)
+      let data = await response.json()
+     
+      programEvent.summary = data.title
+      programEvent.description = data.contents.join(", ")
+    }
+    </script>
+    <script src="https://apis.google.com/js/api.js"></script>
+   {% endblock %}
+
+{% endblock content %}
